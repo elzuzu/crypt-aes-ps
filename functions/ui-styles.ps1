@@ -55,3 +55,17 @@ function Set-ControlState {
     }
 }
 
+# Crée et associe une info-bulle à un contrôle
+$_toolTips = @()
+function New-InfoTooltip {
+    param(
+        [Parameter(Mandatory)]
+        [System.Windows.Forms.Control]$Control,
+        [Parameter(Mandatory)]
+        [string]$Text
+    )
+    $tip = New-Object System.Windows.Forms.ToolTip
+    $tip.SetToolTip($Control, $Text)
+    $_toolTips += $tip
+}
+
