@@ -1,39 +1,57 @@
 # Outil de cryptage/décryptage des NNSS
 
-Ce dépôt contient un script PowerShell permettant de chiffrer ou de déchiffrer des numéros NNSS (ou NAVS) stockés dans un fichier CSV ou Excel. Le script a été conçu pour faciliter les échanges sécurisés entre le SPC et l'Hospice Général.
+Ce projet fournit un script **PowerShell** permettant de chiffrer ou de déchiffrer des numéros NNSS (NAVS) contenus dans des fichiers CSV ou Excel. Il a pour but de faciliter l’échange sécurisé de ces données entre le SPC et l’Hospice Général.
+
+## Sommaire
+- [Fonctionnement](#fonctionnement)
+- [Prérequis](#prérequis)
+- [Installation](#installation)
+- [Utilisation](#utilisation)
+- [Bonnes pratiques de sécurité](#bonnes-pratiques-de-sécurité)
+- [Contribuer](#contribuer)
+- [Licence](#licence)
 
 ## Fonctionnement
-
-- **Cryptage AES‑256‑CBC** : les fonctions `Protect-NNSSData` et `Unprotect-NNSSData` utilisent l'algorithme AES avec un mode CBC et un remplissage PKCS7 pour chiffrer ou déchiffrer la valeur de chaque cellule.
-- **Clé et IV ajustés** : `ConvertTo-SecureAESKey` convertit les chaînes fournies en tableau d'octets et ajuste la longueur de la clé (32 octets) et du vecteur d'initialisation (16 octets) 【F:nnss-crypt.ps1†L17-L48】.
-- **Traitement CSV/Excel** : selon l'extension du fichier, les fonctions `Process-CSVFile` ou `Process-ExcelFile` chargent les données, appliquent le cryptage/décryptage et enregistrent un nouveau fichier 【F:nnss-crypt.ps1†L193-L238】【F:nnss-crypt.ps1†L248-L318】.
-- **Interface graphique** : le script crée un formulaire Windows Forms permettant de choisir le fichier d'entrée, la colonne NNSS, la clé partagée, l'IV et l'emplacement du fichier de sortie avant de lancer l'opération.
+- **Cryptage AES‑256‑CBC** : les fonctions `Protect-NNSSData` et `Unprotect-NNSSData` appliquent l’algorithme AES en mode CBC avec remplissage PKCS7 pour chaque valeur à traiter.
+- **Clé et IV ajustés** : `ConvertTo-SecureAESKey` s’assure que la clé (32 octets) et le vecteur d’initialisation (16 octets) sont aux bonnes longueurs avant l’opération 【F:functions/crypt-functions.ps1†L1-L34】.
+- **Traitement CSV/Excel** : selon l’extension du fichier, `Process-CSVFile` ou `Process-ExcelFile` charge les données, applique le cryptage ou le décryptage et sauvegarde un nouveau fichier 【F:functions/crypt-functions.ps1†L178-L229】【F:functions/crypt-functions.ps1†L233-L314】.
+- **Interface graphique** : le script génère un formulaire Windows Forms permettant de choisir le fichier d’entrée, de sélectionner la colonne NNSS, de saisir la clé partagée et l’IV puis de lancer le traitement.
+- **Détection automatique de colonne** : lors du choix du fichier, le script tente d’identifier la colonne contenant les numéros NNSS/NAVS pour simplifier la sélection.
+- **Indicateur de progression** : une barre d’avancement et des messages d’état informent de la progression du traitement.
 
 ## Prérequis
+- Windows avec **PowerShell 5** ou version ultérieure.
+- Microsoft Excel installé pour traiter les fichiers `.xlsx`/`.xls` (utilisation d’`Microsoft.Office.Interop.Excel`).
+- Le script charge plusieurs assemblies .NET via `Add-Type` 【F:nnss-crypt.ps1†L16-L24】.
 
-- Windows avec **PowerShell 5**.
-- Microsoft Excel doit être installé pour traiter les fichiers `.xlsx`/`.xls` (utilisation d'`Microsoft.Office.Interop.Excel`).
-- Le script charge plusieurs assemblies .NET via `Add-Type` 【F:nnss-crypt.ps1†L9-L14】.
+## Installation
+1. Télécharger ou cloner ce dépôt.
+2. Ouvrir une console PowerShell dans le répertoire du projet.
 
 ## Utilisation
-
-1. Ouvrir une console PowerShell.
-2. Exécuter le script en autorisant son lancement :
+Exécuter le script avec la politique d’exécution levée :
 
 ```powershell
 powershell.exe -ExecutionPolicy Bypass -File .\nnss-crypt.ps1
 ```
 
-3. Dans la fenêtre qui s'ouvre :
-   - Sélectionner le fichier CSV ou Excel contenant les NNSS.
-   - Choisir la colonne à traiter.
-   - Saisir la clé et le vecteur d'initialisation identiques entre les deux parties.
-   - Choisir si l'on souhaite crypter ou décrypter puis indiquer le fichier de sortie.
-   - Lancer le traitement.
+Dans la fenêtre qui s’ouvre :
+1. Parcourir et sélectionner le fichier CSV ou Excel contenant les numéros à traiter (les colonnes sont chargées automatiquement).
+2. Choisir la colonne cible si elle n’a pas été détectée.
+3. Renseigner la clé et le vecteur d’initialisation identiques pour l’émetteur et le destinataire.
+4. Choisir le mode **Crypter** ou **Décrypter** puis l’emplacement du fichier de sortie.
+5. Lancer l’opération et patienter jusqu’à l’affichage du message de résultat.
 
-Le fichier résultant sera enregistré à l'emplacement indiqué.
+Le fichier résultant est enregistré à l’emplacement indiqué.
 
-## Avertissement
+## Bonnes pratiques de sécurité
+- Utiliser une clé et un IV suffisamment longs (le script vérifie une longueur minimale de 12 caractères pour la clé et 8 pour l’IV).
+- Transmettre ces valeurs par un canal sécurisé et éviter de les conserver en clair.
+- Exécuter le script dans un environnement de confiance uniquement.
 
-Vérifiez que la clé et l'IV utilisés sont transmis de manière sécurisée et ne sont pas stockés en clair. Le script doit être exécuté dans un environnement de confiance.
+## Contribuer
+Les demandes d’amélioration ou de correction sont les bienvenues via un système de Pull Request. Merci de décrire brièvement la modification proposée et de respecter la structure existante du projet.
+
+## Licence
+Aucune licence open source n’est fournie dans ce dépôt. Veuillez contacter les mainteneurs pour toute question d’utilisation ou de redistribution.
 
