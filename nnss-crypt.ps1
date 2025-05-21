@@ -142,14 +142,14 @@ $mainPanel.Controls.Add($columnPanel)
 $columnLabel = New-Object System.Windows.Forms.Label
 $columnLabel.Location = New-Object System.Drawing.Point(0, 0)
 $columnLabel.Size = New-Object System.Drawing.Size(250, 25)
-$columnLabel.Text = "Colonne NNSS à traiter:"
+$columnLabel.Text = "Colonne à traiter:"
 $columnLabel.Font = $fontRegular
 $columnPanel.Controls.Add($columnLabel)
 
 $columnInfo = New-Object System.Windows.Forms.Label
 $columnInfo.Location = New-Object System.Drawing.Point(250, 0)
 $columnInfo.Size = New-Object System.Drawing.Size(380, 25)
-$columnInfo.Text = "(Sélectionnez la colonne contenant les numéros AVS)"
+$columnInfo.Text = "(Sélectionnez la colonne contenant les valeurs à traiter)"
 $columnInfo.Font = $fontSmall
 $columnInfo.ForeColor = [System.Drawing.Color]::FromArgb(96, 94, 92)
 $columnPanel.Controls.Add($columnInfo)
@@ -160,6 +160,11 @@ $columnComboBox.Size = New-Object System.Drawing.Size(300, 30)
 $columnComboBox.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
 Set-ModernComboBoxStyle -ComboBox $columnComboBox
 $columnPanel.Controls.Add($columnComboBox)
+$columnComboBox.Add_SelectedIndexChanged({
+    if ($columnComboBox.SelectedIndex -ge 0) {
+        $statusLabel.Text = "Colonne sélectionnée : $($columnComboBox.SelectedItem). Configurez les paramètres de sécurité."
+    }
+})
 
 # Séparateur
 $separator2 = New-Object System.Windows.Forms.Panel
@@ -390,7 +395,7 @@ $inputFileBrowseButton.Add_Click({
                     # Essayer de détecter automatiquement la colonne NNSS
                     $nnssColumnIndex = -1
                     for ($i = 0; $i -lt $columns.Count; $i++) {
-                        if ($columns[$i] -match "NNSS|NAVS|AVS|NSS|no_avs|numero_avs") {
+                        if ($columns[$i] -match "NNSS|NAVS|AVS|NSS|no_avs|numero_avs|BNF") {
                             $nnssColumnIndex = $i
                             break
                         }
@@ -414,7 +419,7 @@ $inputFileBrowseButton.Add_Click({
                     $operation = if ($encryptRadioButton.Checked) { "crypte" } else { "decrypte" }
                     $outputFileTextBox.Text = [System.IO.Path]::Combine($outputPath, "$fileNameWithoutExt`_$($operation)$extension")
                     
-                    $statusLabel.Text = "Fichier chargé avec succès. Veuillez sélectionner la colonne NNSS et configurer les paramètres de sécurité."
+                    $statusLabel.Text = "Fichier chargé avec succès. Sélectionnez la colonne à traiter et configurez les paramètres de sécurité."
                 }
             }
             catch {
