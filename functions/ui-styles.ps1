@@ -69,3 +69,24 @@ function New-InfoTooltip {
     $_toolTips += $tip
 }
 
+# Définit un texte d'exemple affiché lorsqu'une zone de saisie est vide
+Add-Type @"
+using System;
+using System.Runtime.InteropServices;
+public class Win32Placeholder {
+    [DllImport("user32.dll", CharSet = CharSet.Auto)]
+    public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, string lParam);
+}
+"@
+
+function Set-TextBoxPlaceholder {
+    param(
+        [Parameter(Mandatory)]
+        [System.Windows.Forms.TextBox]$TextBox,
+        [Parameter(Mandatory)]
+        [string]$Text
+    )
+    $EM_SETCUEBANNER = 0x1501
+    [Win32Placeholder]::SendMessage($TextBox.Handle, $EM_SETCUEBANNER, 0, $Text) | Out-Null
+}
+

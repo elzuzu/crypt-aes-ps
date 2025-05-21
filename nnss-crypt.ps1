@@ -211,6 +211,7 @@ $keyTextBox.Location = New-Object System.Drawing.Point(0, 30)
 $keyTextBox.Size = New-Object System.Drawing.Size(420, 30)
 $keyTextBox.PasswordChar = '•'
 Set-ModernTextBoxStyle -TextBox $keyTextBox
+Set-TextBoxPlaceholder -TextBox $keyTextBox -Text "min. 12 caractères"
 $cryptoPanel.Controls.Add($keyTextBox)
 
 # Vecteur d'initialisation (IV)
@@ -235,6 +236,7 @@ $ivTextBox.Location = New-Object System.Drawing.Point(0, 95)
 $ivTextBox.Size = New-Object System.Drawing.Size(420, 30)
 $ivTextBox.PasswordChar = '•'
 Set-ModernTextBoxStyle -TextBox $ivTextBox
+Set-TextBoxPlaceholder -TextBox $ivTextBox -Text "min. 8 caractères"
 $cryptoPanel.Controls.Add($ivTextBox)
 
 # Séparateur
@@ -392,8 +394,9 @@ $inputFileBrowseButton.Add_Click({
                         $columnComboBox.Items.Add($column)
                     }
                     
-                    # Essayer de détecter automatiquement la colonne NNSS
+                    # Essayer de détecter automatiquement la colonne NNSS/BNF
                     $nnssColumnIndex = -1
+
                     for ($i = 0; $i -lt $columns.Count; $i++) {
                         if ($columns[$i] -match "NNSS|NAVS|AVS|NSS|no_avs|numero_avs|BNF") {
                             $nnssColumnIndex = $i
