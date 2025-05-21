@@ -13,8 +13,8 @@ Add-Type -AssemblyName PresentationFramework
 Add-Type -AssemblyName Microsoft.Office.Interop.Excel
 Add-Type -AssemblyName System.Windows.Forms.DataVisualization
 # Charger les fonctions de traitement
-. (Join-Path $PSScriptRoot "Functions/CryptFunctions.ps1")
-. (Join-Path $PSScriptRoot "Functions/UIStyles.ps1")
+. (Join-Path $PSScriptRoot "functions/crypt-functions.ps1")
+. (Join-Path $PSScriptRoot "functions/ui-styles.ps1")
 
 # Créer l'interface utilisateur
 $form = New-Object System.Windows.Forms.Form
