@@ -396,6 +396,7 @@ $inputFileBrowseButton.Add_Click({
                     
                     # Essayer de détecter automatiquement la colonne NNSS/BNF
                     $nnssColumnIndex = -1
+
                     for ($i = 0; $i -lt $columns.Count; $i++) {
                         if ($columns[$i] -match "NNSS|NAVS|AVS|NSS|no_avs|numero_avs|BNF") {
                             $nnssColumnIndex = $i
