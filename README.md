@@ -4,6 +4,7 @@ Ce projet fournit un script **PowerShell** permettant de chiffrer ou de déchiff
 
 ## Sommaire
 - [Fonctionnement](#fonctionnement)
+- [Principes cryptographiques](#principes-cryptographiques)
 - [Prérequis](#prérequis)
 - [Installation](#installation)
 - [Utilisation](#utilisation)
@@ -18,6 +19,27 @@ Ce projet fournit un script **PowerShell** permettant de chiffrer ou de déchiff
 - **Interface graphique** : le script génère un formulaire Windows Forms permettant de choisir le fichier d’entrée, de sélectionner la colonne NNSS, de saisir la clé partagée et l’IV puis de lancer le traitement.
 - **Détection automatique de colonne** : lors du choix du fichier, le script tente d’identifier la colonne contenant les numéros NNSS/NAVS pour simplifier la sélection.
 - **Indicateur de progression** : une barre d’avancement et des messages d’état informent de la progression du traitement.
+
+## Principes cryptographiques
+L’outil met en œuvre la norme **AES** (Advanced Encryption Standard) dans sa
+version 256 bits. AES est un chiffrement symétrique en bloc reposant sur un
+réseau de substitutions et de permutations. Pour une clé de cette longueur,
+quatorze tours successifs sont appliqués, chacun combinant les opérations
+**SubBytes**, **ShiftRows**, **MixColumns** et **AddRoundKey** afin d’assurer la
+diffusion et la confusion des données.
+
+Le bloc traité mesure toujours 16 octets (128 bits). En mode **CBC**
+(Cipher Block Chaining), chaque bloc est préalablement « XORé » avec le bloc
+chiffré précédent ou avec l’IV pour le premier bloc, garantissant ainsi que deux
+blocs identiques ne produisent pas le même résultat. Le vecteur d’initialisation
+transmis est ajusté à exactement 16 octets par la fonction
+`ConvertTo-SecureAESKey` 【F:functions/crypt-functions.ps1†L12-L28】, tandis que la
+clé est tronquée ou complétée à 32 octets 【F:functions/crypt-functions.ps1†L14-L21】.
+
+Le résultat du chiffrement est encodé en Base64 pour pouvoir être stocké dans un
+fichier texte ou tableur. Ce script n’ajoute pas de mécanisme d’authentification
+des données ; l’ajout d’une signature HMAC ou l’emploi d’un mode authentifié
+(par exemple AES‑GCM) est recommandé si l’intégrité doit être garantie.
 
 ## Prérequis
 - Windows avec **PowerShell 5** ou version ultérieure.
