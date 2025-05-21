@@ -25,7 +25,7 @@ Add-Type -AssemblyName System.Windows.Forms.DataVisualization
 # Créer l'interface utilisateur
 $form = New-Object System.Windows.Forms.Form
 $form.Text = "SPC - Cryptage/Décryptage des NNSS"
-$form.Size = New-Object System.Drawing.Size(700, 600)
+$form.Size = New-Object System.Drawing.Size(700, 610)
 $form.StartPosition = "CenterScreen"
 $form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedDialog
 $form.MaximizeBox = $false
@@ -35,16 +35,16 @@ $form.ForeColor = $themeColors.TextDark
 $form.Font = $fontRegular
 $form.Padding = New-Object System.Windows.Forms.Padding(24)
 
-# Créons un panel pour contenir tous les contrôles avec défilement
+# Créons un panel pour contenir tous les contrôles (sans défilement)
 $mainPanel = New-Object System.Windows.Forms.Panel
 $mainPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
-$mainPanel.AutoScroll = $true
+$mainPanel.AutoScroll = $false
 $form.Controls.Add($mainPanel)
 
 # Logo et titre
 $logoPanel = New-Object System.Windows.Forms.Panel
-$logoPanel.Size = New-Object System.Drawing.Size(650, 70)
-$logoPanel.Location = New-Object System.Drawing.Point(0, 10)
+$logoPanel.Size = New-Object System.Drawing.Size(650, 60)
+$logoPanel.Location = New-Object System.Drawing.Point(0, 0)
 $logoPanel.BackColor = [System.Drawing.Color]::Transparent
 $mainPanel.Controls.Add($logoPanel)
 
@@ -82,14 +82,14 @@ $logoPanel.Controls.Add($subtitleLabel)
 
 # Séparateur
 $separator1 = New-Object System.Windows.Forms.Panel
-$separator1.Location = New-Object System.Drawing.Point(24, 85)
+$separator1.Location = New-Object System.Drawing.Point(24, 64)
 $separator1.Size = New-Object System.Drawing.Size(630, 1)
 $separator1.BackColor = $themeColors.Border
 $mainPanel.Controls.Add($separator1)
 
 # Section 1: Sélection du fichier
 $fileSelectionLabel = New-Object System.Windows.Forms.Label
-$fileSelectionLabel.Location = New-Object System.Drawing.Point(24, 95)
+$fileSelectionLabel.Location = New-Object System.Drawing.Point(24, 69)
 $fileSelectionLabel.Size = New-Object System.Drawing.Size(630, 25)
 $fileSelectionLabel.Text = "1. Sélection du fichier"
 $fileSelectionLabel.Font = $fontHeader
@@ -98,8 +98,8 @@ $mainPanel.Controls.Add($fileSelectionLabel)
 
 # Sélection du fichier d'entrée
 $inputFilePanel = New-Object System.Windows.Forms.Panel
-$inputFilePanel.Location = New-Object System.Drawing.Point(24, 125)
-$inputFilePanel.Size = New-Object System.Drawing.Size(630, 80)
+$inputFilePanel.Location = New-Object System.Drawing.Point(24, 98)
+$inputFilePanel.Size = New-Object System.Drawing.Size(630, 60)
 $inputFilePanel.BackColor = [System.Drawing.Color]::Transparent
 $mainPanel.Controls.Add($inputFilePanel)
 
@@ -120,13 +120,13 @@ $inputFilePanel.Controls.Add($inputFileInfo)
 
 $inputFileTextBox = New-Object System.Windows.Forms.TextBox
 $inputFileTextBox.Location = New-Object System.Drawing.Point(0, 30)
-$inputFileTextBox.Size = New-Object System.Drawing.Size(520, 30)
+$inputFileTextBox.Size = New-Object System.Drawing.Size(480, 30)
 $inputFileTextBox.ReadOnly = $true
 Set-ModernTextBoxStyle -TextBox $inputFileTextBox
 $inputFilePanel.Controls.Add($inputFileTextBox)
 
 $inputFileBrowseButton = New-Object System.Windows.Forms.Button
-$inputFileBrowseButton.Location = New-Object System.Drawing.Point(530, 30)
+$inputFileBrowseButton.Location = New-Object System.Drawing.Point(490, 30)
 $inputFileBrowseButton.Size = New-Object System.Drawing.Size(100, 30)
 $inputFileBrowseButton.Text = "Parcourir"
 Set-ModernButtonStyle -Button $inputFileBrowseButton -BackColor $themeColors.Secondary -ForeColor $themeColors.TextDark
@@ -134,8 +134,8 @@ $inputFilePanel.Controls.Add($inputFileBrowseButton)
 
 # Sélection de la colonne à traiter
 $columnPanel = New-Object System.Windows.Forms.Panel
-$columnPanel.Location = New-Object System.Drawing.Point(24, 215)
-$columnPanel.Size = New-Object System.Drawing.Size(630, 70)
+$columnPanel.Location = New-Object System.Drawing.Point(24, 162)
+$columnPanel.Size = New-Object System.Drawing.Size(630, 60)
 $columnPanel.BackColor = [System.Drawing.Color]::Transparent
 $mainPanel.Controls.Add($columnPanel)
 
@@ -163,14 +163,14 @@ $columnPanel.Controls.Add($columnComboBox)
 
 # Séparateur
 $separator2 = New-Object System.Windows.Forms.Panel
-$separator2.Location = New-Object System.Drawing.Point(24, 295)
+$separator2.Location = New-Object System.Drawing.Point(24, 226)
 $separator2.Size = New-Object System.Drawing.Size(630, 1)
 $separator2.BackColor = $themeColors.Border
 $mainPanel.Controls.Add($separator2)
 
 # Section 2: Paramètres de cryptage
 $cryptoLabel = New-Object System.Windows.Forms.Label
-$cryptoLabel.Location = New-Object System.Drawing.Point(24, 305)
+$cryptoLabel.Location = New-Object System.Drawing.Point(24, 231)
 $cryptoLabel.Size = New-Object System.Drawing.Size(630, 25)
 $cryptoLabel.Text = "2. Paramètres de sécurité"
 $cryptoLabel.Font = $fontHeader
@@ -179,8 +179,8 @@ $mainPanel.Controls.Add($cryptoLabel)
 
 # Groupbox pour les paramètres de cryptage
 $cryptoPanel = New-Object System.Windows.Forms.Panel
-$cryptoPanel.Location = New-Object System.Drawing.Point(24, 335)
-$cryptoPanel.Size = New-Object System.Drawing.Size(630, 140)
+$cryptoPanel.Location = New-Object System.Drawing.Point(24, 260)
+$cryptoPanel.Size = New-Object System.Drawing.Size(630, 130)
 $cryptoPanel.BackColor = [System.Drawing.Color]::Transparent
 $mainPanel.Controls.Add($cryptoPanel)
 
@@ -203,7 +203,7 @@ $cryptoPanel.Controls.Add($keyInfo)
 
 $keyTextBox = New-Object System.Windows.Forms.TextBox
 $keyTextBox.Location = New-Object System.Drawing.Point(0, 30)
-$keyTextBox.Size = New-Object System.Drawing.Size(630, 30)
+$keyTextBox.Size = New-Object System.Drawing.Size(420, 30)
 $keyTextBox.PasswordChar = '•'
 Set-ModernTextBoxStyle -TextBox $keyTextBox
 $cryptoPanel.Controls.Add($keyTextBox)
@@ -227,21 +227,21 @@ $cryptoPanel.Controls.Add($ivInfo)
 
 $ivTextBox = New-Object System.Windows.Forms.TextBox
 $ivTextBox.Location = New-Object System.Drawing.Point(0, 95)
-$ivTextBox.Size = New-Object System.Drawing.Size(630, 30)
+$ivTextBox.Size = New-Object System.Drawing.Size(420, 30)
 $ivTextBox.PasswordChar = '•'
 Set-ModernTextBoxStyle -TextBox $ivTextBox
 $cryptoPanel.Controls.Add($ivTextBox)
 
 # Séparateur
 $separator3 = New-Object System.Windows.Forms.Panel
-$separator3.Location = New-Object System.Drawing.Point(24, 485)
+$separator3.Location = New-Object System.Drawing.Point(24, 394)
 $separator3.Size = New-Object System.Drawing.Size(630, 1)
 $separator3.BackColor = $themeColors.Border
 $mainPanel.Controls.Add($separator3)
 
 # Section 3: Fichier de sortie
 $outputLabel = New-Object System.Windows.Forms.Label
-$outputLabel.Location = New-Object System.Drawing.Point(24, 495)
+$outputLabel.Location = New-Object System.Drawing.Point(24, 399)
 $outputLabel.Size = New-Object System.Drawing.Size(630, 25)
 $outputLabel.Text = "3. Fichier de sortie"
 $outputLabel.Font = $fontHeader
@@ -250,8 +250,8 @@ $mainPanel.Controls.Add($outputLabel)
 
 # Sélection du fichier de sortie
 $outputFilePanel = New-Object System.Windows.Forms.Panel
-$outputFilePanel.Location = New-Object System.Drawing.Point(24, 525)
-$outputFilePanel.Size = New-Object System.Drawing.Size(630, 70)
+$outputFilePanel.Location = New-Object System.Drawing.Point(24, 428)
+$outputFilePanel.Size = New-Object System.Drawing.Size(630, 60)
 $outputFilePanel.BackColor = [System.Drawing.Color]::Transparent
 $mainPanel.Controls.Add($outputFilePanel)
 
@@ -264,13 +264,13 @@ $outputFilePanel.Controls.Add($outputFileLabel)
 
 $outputFileTextBox = New-Object System.Windows.Forms.TextBox
 $outputFileTextBox.Location = New-Object System.Drawing.Point(0, 30)
-$outputFileTextBox.Size = New-Object System.Drawing.Size(520, 30)
+$outputFileTextBox.Size = New-Object System.Drawing.Size(480, 30)
 $outputFileTextBox.ReadOnly = $true
 Set-ModernTextBoxStyle -TextBox $outputFileTextBox
 $outputFilePanel.Controls.Add($outputFileTextBox)
 
 $outputFileBrowseButton = New-Object System.Windows.Forms.Button
-$outputFileBrowseButton.Location = New-Object System.Drawing.Point(530, 30)
+$outputFileBrowseButton.Location = New-Object System.Drawing.Point(490, 30)
 $outputFileBrowseButton.Size = New-Object System.Drawing.Size(100, 30)
 $outputFileBrowseButton.Text = "Parcourir"
 Set-ModernButtonStyle -Button $outputFileBrowseButton -BackColor $themeColors.Secondary -ForeColor $themeColors.TextDark
@@ -278,15 +278,15 @@ $outputFilePanel.Controls.Add($outputFileBrowseButton)
 
 # Séparateur
 $separator4 = New-Object System.Windows.Forms.Panel
-$separator4.Location = New-Object System.Drawing.Point(24, 605)
+$separator4.Location = New-Object System.Drawing.Point(24, 492)
 $separator4.Size = New-Object System.Drawing.Size(630, 1)
 $separator4.BackColor = $themeColors.Border
 $mainPanel.Controls.Add($separator4)
 
 # Section 4: Mode et actions
 $actionsPanel = New-Object System.Windows.Forms.Panel
-$actionsPanel.Location = New-Object System.Drawing.Point(24, 615)
-$actionsPanel.Size = New-Object System.Drawing.Size(630, 90)
+$actionsPanel.Location = New-Object System.Drawing.Point(24, 497)
+$actionsPanel.Size = New-Object System.Drawing.Size(630, 60)
 $actionsPanel.BackColor = [System.Drawing.Color]::Transparent
 $mainPanel.Controls.Add($actionsPanel)
 
@@ -331,7 +331,7 @@ $actionsPanel.Controls.Add($cancelButton)
 
 # Indicateur de progression
 $progressPanel = New-Object System.Windows.Forms.Panel
-$progressPanel.Location = New-Object System.Drawing.Point(24, 715)
+$progressPanel.Location = New-Object System.Drawing.Point(24, 497)
 $progressPanel.Size = New-Object System.Drawing.Size(630, 60)
 $progressPanel.BackColor = [System.Drawing.Color]::Transparent
 $progressPanel.Visible = $false
