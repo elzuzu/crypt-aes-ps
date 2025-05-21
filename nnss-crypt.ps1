@@ -6,6 +6,12 @@
 # Ce script permet de crypter ou décrypter les numéros NNSS dans un fichier CSV ou Excel
 # en utilisant l'algorithme AES-256-CBC avec une clé et un vecteur d'initialisation partagés.
 
+# Vérifier la version de PowerShell
+if ($PSVersionTable.PSVersion.Major -lt 5) {
+    Write-Error "Ce script nécessite PowerShell 5 ou supérieur." -Category InvalidArgument
+    return
+}
+
 # Charger les assemblies nécessaires
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
@@ -186,11 +192,12 @@ $keyLabel.Text = "Clé partagée:"
 $keyLabel.Font = $fontRegular
 $cryptoPanel.Controls.Add($keyLabel)
 
-$keyInfo = New-Object System.Windows.Forms.PictureBox
+$keyInfo = New-Object System.Windows.Forms.Label
 $keyInfo.Size = New-Object System.Drawing.Size(20, 20)
 $keyInfo.Location = New-Object System.Drawing.Point(200, 5)
 $keyInfo.BackColor = [System.Drawing.Color]::Transparent
-$keyInfo.Text = "ℹ️"
+$keyInfo.Text = "ℹ"
+$keyInfo.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
 New-InfoTooltip -Control $keyInfo -Text "La clé doit être identique entre le SPC et l'Hospice Général pour assurer la compatibilité du cryptage/décryptage"
 $cryptoPanel.Controls.Add($keyInfo)
 
@@ -209,11 +216,12 @@ $ivLabel.Text = "Vecteur d'initialisation (IV):"
 $ivLabel.Font = $fontRegular
 $cryptoPanel.Controls.Add($ivLabel)
 
-$ivInfo = New-Object System.Windows.Forms.PictureBox
+$ivInfo = New-Object System.Windows.Forms.Label
 $ivInfo.Size = New-Object System.Drawing.Size(20, 20)
 $ivInfo.Location = New-Object System.Drawing.Point(250, 70)
 $ivInfo.BackColor = [System.Drawing.Color]::Transparent
-$ivInfo.Text = "ℹ️"
+$ivInfo.Text = "ℹ"
+$ivInfo.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
 New-InfoTooltip -Control $ivInfo -Text "Le vecteur d'initialisation doit également être identique entre le SPC et l'Hospice Général"
 $cryptoPanel.Controls.Add($ivInfo)
 
