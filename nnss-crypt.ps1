@@ -398,8 +398,11 @@ $inputFileBrowseButton.Add_Click({
                     
                     if ($nnssColumnIndex -ge 0) {
                         $columnComboBox.SelectedIndex = $nnssColumnIndex
+                    } elseif ($columnComboBox.Items.Count -gt 0) {
+                        $columnComboBox.SelectedIndex = 0
                     }
-                    elseif ($columnComboBox.Items.Count -gt 0) {
+
+                    if ($columnComboBox.SelectedIndex -lt 0 -and $columnComboBox.Items.Count -gt 0) {
                         $columnComboBox.SelectedIndex = 0
                     }
                     
@@ -484,7 +487,7 @@ $processButton.Add_Click({
             return
         }
         
-        if ($columnComboBox.SelectedItem -eq $null) {
+        if ($columnComboBox.SelectedIndex -lt 0) {
             [System.Windows.MessageBox]::Show("Veuillez sélectionner une colonne à traiter.", "Champ manquant", [System.Windows.MessageBoxButton]::OK, [System.Windows.MessageBoxImage]::Warning)
             return
         }
