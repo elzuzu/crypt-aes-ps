@@ -319,7 +319,7 @@ $processButton = New-Object System.Windows.Forms.Button
 $processButton.Location = New-Object System.Drawing.Point(380, 15)
 $processButton.Size = New-Object System.Drawing.Size(120, 40)
 $processButton.Text = "Traiter"
-Set-ModernButtonStyle -Button $processButton -BackColor $themeColors.Primary -ForeColor $themeColors.TextLight -IsPrimary $true
+Set-ModernButtonStyle -Button $processButton -BackColor $themeColors.Primary -ForeColor $themeColors.TextLight -IsPrimary
 $actionsPanel.Controls.Add($processButton)
 
 $cancelButton = New-Object System.Windows.Forms.Button
