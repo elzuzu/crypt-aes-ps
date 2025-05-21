@@ -198,7 +198,7 @@ $keyInfo.Location = New-Object System.Drawing.Point(200, 5)
 $keyInfo.BackColor = [System.Drawing.Color]::Transparent
 $keyInfo.Text = "ℹ"
 $keyInfo.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
-New-InfoTooltip -Control $keyInfo -Text "La clé doit être identique entre le SPC et l'Hospice Général pour assurer la compatibilité du cryptage/décryptage"
+New-InfoTooltip -Control $keyInfo -Text "Clé partagée utilisée pour le cryptage. Minimum 12 caractères et identique entre le SPC et l'Hospice Général."
 $cryptoPanel.Controls.Add($keyInfo)
 
 $keyTextBox = New-Object System.Windows.Forms.TextBox
@@ -206,6 +206,7 @@ $keyTextBox.Location = New-Object System.Drawing.Point(0, 30)
 $keyTextBox.Size = New-Object System.Drawing.Size(420, 30)
 $keyTextBox.PasswordChar = '•'
 Set-ModernTextBoxStyle -TextBox $keyTextBox
+Set-TextBoxPlaceholder -TextBox $keyTextBox -Text "min. 12 caractères"
 $cryptoPanel.Controls.Add($keyTextBox)
 
 # Vecteur d'initialisation (IV)
@@ -222,7 +223,7 @@ $ivInfo.Location = New-Object System.Drawing.Point(250, 70)
 $ivInfo.BackColor = [System.Drawing.Color]::Transparent
 $ivInfo.Text = "ℹ"
 $ivInfo.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
-New-InfoTooltip -Control $ivInfo -Text "Le vecteur d'initialisation doit également être identique entre le SPC et l'Hospice Général"
+New-InfoTooltip -Control $ivInfo -Text "Vecteur d'initialisation (IV) à partager. Minimum 8 caractères, identique pour le SPC et l'Hospice Général."
 $cryptoPanel.Controls.Add($ivInfo)
 
 $ivTextBox = New-Object System.Windows.Forms.TextBox
@@ -230,6 +231,7 @@ $ivTextBox.Location = New-Object System.Drawing.Point(0, 95)
 $ivTextBox.Size = New-Object System.Drawing.Size(420, 30)
 $ivTextBox.PasswordChar = '•'
 Set-ModernTextBoxStyle -TextBox $ivTextBox
+Set-TextBoxPlaceholder -TextBox $ivTextBox -Text "min. 8 caractères"
 $cryptoPanel.Controls.Add($ivTextBox)
 
 # Séparateur
@@ -387,10 +389,10 @@ $inputFileBrowseButton.Add_Click({
                         $columnComboBox.Items.Add($column)
                     }
                     
-                    # Essayer de détecter automatiquement la colonne NNSS
+                    # Essayer de détecter automatiquement la colonne contenant les identifiants
                     $nnssColumnIndex = -1
                     for ($i = 0; $i -lt $columns.Count; $i++) {
-                        if ($columns[$i] -match "NNSS|NAVS|AVS|NSS|no_avs|numero_avs") {
+                        if ($columns[$i] -match "NNSS|NAVS|AVS|NSS|no_avs|numero_avs|BNF") {
                             $nnssColumnIndex = $i
                             break
                         }
@@ -398,8 +400,11 @@ $inputFileBrowseButton.Add_Click({
                     
                     if ($nnssColumnIndex -ge 0) {
                         $columnComboBox.SelectedIndex = $nnssColumnIndex
+                    } elseif ($columnComboBox.Items.Count -gt 0) {
+                        $columnComboBox.SelectedIndex = 0
                     }
-                    elseif ($columnComboBox.Items.Count -gt 0) {
+
+                    if ($columnComboBox.SelectedIndex -lt 0 -and $columnComboBox.Items.Count -gt 0) {
                         $columnComboBox.SelectedIndex = 0
                     }
                     
@@ -411,7 +416,7 @@ $inputFileBrowseButton.Add_Click({
                     $operation = if ($encryptRadioButton.Checked) { "crypte" } else { "decrypte" }
                     $outputFileTextBox.Text = [System.IO.Path]::Combine($outputPath, "$fileNameWithoutExt`_$($operation)$extension")
                     
-                    $statusLabel.Text = "Fichier chargé avec succès. Veuillez sélectionner la colonne NNSS et configurer les paramètres de sécurité."
+                    $statusLabel.Text = "Fichier chargé avec succès. Sélectionnez la colonne à traiter et configurez les paramètres de sécurité."
                 }
             }
             catch {
@@ -484,7 +489,7 @@ $processButton.Add_Click({
             return
         }
         
-        if ($columnComboBox.SelectedItem -eq $null) {
+        if ($columnComboBox.SelectedIndex -lt 0) {
             [System.Windows.MessageBox]::Show("Veuillez sélectionner une colonne à traiter.", "Champ manquant", [System.Windows.MessageBoxButton]::OK, [System.Windows.MessageBoxImage]::Warning)
             return
         }

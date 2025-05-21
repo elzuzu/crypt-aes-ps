@@ -69,3 +69,22 @@ function New-InfoTooltip {
     $_toolTips += $tip
 }
 
+# Ajoute un texte indicatif (placeholder) dans une zone de saisie
+Add-Type @"
+using System;
+using System.Runtime.InteropServices;
+public class Win32 {
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    public static extern IntPtr SendMessage(IntPtr hWnd, int msg, int wParam, string lParam);
+}
+"@
+
+$EM_SETCUEBANNER = 0x1501
+function Set-TextBoxPlaceholder {
+    param(
+        [System.Windows.Forms.TextBox]$TextBox,
+        [string]$Text
+    )
+    [Win32]::SendMessage($TextBox.Handle, $EM_SETCUEBANNER, 0, $Text) | Out-Null
+}
+
