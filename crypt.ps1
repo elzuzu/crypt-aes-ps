@@ -14,6 +14,7 @@ Add-Type -AssemblyName Microsoft.Office.Interop.Excel
 Add-Type -AssemblyName System.Windows.Forms.DataVisualization
 # Charger les fonctions de traitement
 . (Join-Path $PSScriptRoot "Functions/CryptFunctions.ps1")
+. (Join-Path $PSScriptRoot "Functions/UIStyles.ps1")
 
 # Créer l'interface utilisateur
 $form = New-Object System.Windows.Forms.Form
@@ -361,10 +362,7 @@ $inputFileBrowseButton.Add_Click({
             $statusLabel.Text = "Analyse du fichier en cours..."
             
             # Désactiver les contrôles pendant l'analyse
-            $inputFileBrowseButton.Enabled = $false
-            $columnComboBox.Enabled = $false
-            $outputFileBrowseButton.Enabled = $false
-            $processButton.Enabled = $false
+            Set-ControlState -Enabled $false -Controls @($inputFileBrowseButton,$columnComboBox,$outputFileBrowseButton,$processButton)
             
             # Montrer le panneau de progression
             $progressPanel.Visible = $true
@@ -414,10 +412,7 @@ $inputFileBrowseButton.Add_Click({
             }
             finally {
                 # Réactiver les contrôles
-                $inputFileBrowseButton.Enabled = $true
-                $columnComboBox.Enabled = $true
-                $outputFileBrowseButton.Enabled = $true
-                $processButton.Enabled = $true
+                Set-ControlState -Enabled $true -Controls @($inputFileBrowseButton,$columnComboBox,$outputFileBrowseButton,$processButton)
                 
                 # Cacher le panneau de progression
                 $progressPanel.Visible = $false
@@ -525,15 +520,7 @@ $processButton.Add_Click({
         }
         
         # Désactiver les contrôles pendant le traitement
-        $inputFileBrowseButton.Enabled = $false
-        $columnComboBox.Enabled = $false
-        $outputFileBrowseButton.Enabled = $false
-        $processButton.Enabled = $false
-        $cancelButton.Enabled = $false
-        $keyTextBox.Enabled = $false
-        $ivTextBox.Enabled = $false
-        $encryptRadioButton.Enabled = $false
-        $decryptRadioButton.Enabled = $false
+        Set-ControlState -Enabled $false -Controls @($inputFileBrowseButton,$columnComboBox,$outputFileBrowseButton,$processButton,$cancelButton,$keyTextBox,$ivTextBox,$encryptRadioButton,$decryptRadioButton)
         
         # Montrer le panneau de progression
         $progressPanel.Visible = $true
@@ -583,15 +570,7 @@ $processButton.Add_Click({
             param($sender, $e)
             
             # Réactiver les contrôles
-            $inputFileBrowseButton.Enabled = $true
-            $columnComboBox.Enabled = $true
-            $outputFileBrowseButton.Enabled = $true
-            $processButton.Enabled = $true
-            $cancelButton.Enabled = $true
-            $keyTextBox.Enabled = $true
-            $ivTextBox.Enabled = $true
-            $encryptRadioButton.Enabled = $true
-            $decryptRadioButton.Enabled = $true
+            Set-ControlState -Enabled $true -Controls @($inputFileBrowseButton,$columnComboBox,$outputFileBrowseButton,$processButton,$cancelButton,$keyTextBox,$ivTextBox,$encryptRadioButton,$decryptRadioButton)
             
             # Cacher le panneau de progression
             $progressPanel.Visible = $false
