@@ -548,90 +548,35 @@ $processButton.Add_Click({
         $statusLabel.Text = "Traitement en cours..."
         $form.Refresh()
         
-        # Traiter le fichier selon son format en arrière-plan
+        # Traiter le fichier de façon synchrone
         $extension = [System.IO.Path]::GetExtension($inputFilePath).ToLower()
-        
-        # Créer un job PowerShell pour exécuter le traitement en arrière-plan
-        $job = [System.ComponentModel.BackgroundWorker]::new()
-        $job.WorkerReportsProgress = $true
-        $job.WorkerSupportsCancellation = $true
-        
-        $job.Add_DoWork({
-            param($sender, $e)
-            $args = $e.Argument
-            
-            try {
-                if ($args.Extension -eq ".csv") {
-                    $result = Process-CSVFile -InputFilePath $args.InputPath -OutputFilePath $args.OutputPath -ColumnName $args.ColumnName -Key $args.Key -IV $args.IV -IsEncryption $args.IsEncryption
-                }
-                elseif ($args.Extension -eq ".xlsx" -or $args.Extension -eq ".xls") {
-                    $result = Process-ExcelFile -InputFilePath $args.InputPath -OutputFilePath $args.OutputPath -ColumnName $args.ColumnName -Key $args.Key -IV $args.IV -IsEncryption $args.IsEncryption
-                }
-                else {
-                    $result = $false
-                    throw "Format de fichier non pris en charge. Veuillez utiliser un fichier CSV ou Excel."
-                }
-                
-                $e.Result = @{
-                    Success = $result
-                    ErrorMessage = $null
-                }
+
+        try {
+            if ($extension -eq ".csv") {
+                $result = Process-CSVFile -InputFilePath $inputFilePath -OutputFilePath $outputFilePath -ColumnName $columnName -Key $cryptoParams.Key -IV $cryptoParams.IV -IsEncryption $isEncryption
             }
-            catch {
-                $e.Result = @{
-                    Success = $false
-                    ErrorMessage = $_.ToString()
-                }
-            }
-        })
-        
-        $job.Add_RunWorkerCompleted({
-            param($sender, $e)
-            
-            # Réactiver les contrôles
-            Set-ControlState -Enabled $true -Controls @($inputFileBrowseButton,$columnComboBox,$outputFileBrowseButton,$processButton,$cancelButton,$keyTextBox,$ivTextBox,$encryptRadioButton,$decryptRadioButton)
-            
-            # Cacher le panneau de progression
-            $progressPanel.Visible = $false
-            
-            if ($e.Error) {
-                [System.Windows.MessageBox]::Show("Une erreur est survenue pendant le traitement: " + $e.Error.Message, "Erreur", [System.Windows.MessageBoxButton]::OK, [System.Windows.MessageBoxImage]::Error)
-                $statusLabel.Text = "Erreur lors du traitement."
-            }
-            elseif ($e.Result.Success) {
-                $operation = if ($isEncryption) { "cryptage" } else { "décryptage" }
-                [System.Windows.MessageBox]::Show("Le $operation a été effectué avec succès. Le fichier a été enregistré à l'emplacement spécifié.", "Succès", [System.Windows.MessageBoxButton]::OK, [System.Windows.MessageBoxImage]::Information)
-                $statusLabel.Text = "Traitement terminé avec succès."
-                
-                # Proposer d'ouvrir le dossier contenant le fichier de sortie
-                $confirmation = [System.Windows.MessageBox]::Show("Voulez-vous ouvrir le dossier contenant le fichier traité?", "Ouvrir le dossier", [System.Windows.MessageBoxButton]::YesNo, [System.Windows.MessageBoxImage]::Question)
-                if ($confirmation -eq [System.Windows.Forms.DialogResult]::Yes) {
-                    Start-Process "explorer.exe" -ArgumentList "/select,`"$outputFilePath`""
-                }
+            elseif ($extension -eq ".xlsx" -or $extension -eq ".xls") {
+                $result = Process-ExcelFile -InputFilePath $inputFilePath -OutputFilePath $outputFilePath -ColumnName $columnName -Key $cryptoParams.Key -IV $cryptoParams.IV -IsEncryption $isEncryption
             }
             else {
-                if ($e.Result.ErrorMessage) {
-                    [System.Windows.MessageBox]::Show("Erreur lors du traitement: " + $e.Result.ErrorMessage, "Erreur", [System.Windows.MessageBoxButton]::OK, [System.Windows.MessageBoxImage]::Error)
-                }
-                else {
-                    [System.Windows.MessageBox]::Show("Une erreur inconnue est survenue lors du traitement.", "Erreur", [System.Windows.MessageBoxButton]::OK, [System.Windows.MessageBoxImage]::Error)
-                }
-                $statusLabel.Text = "Une erreur est survenue lors du traitement."
+                throw "Format de fichier non pris en charge."
             }
-        })
-        
-        # Démarrer le job avec les paramètres
-        $jobParams = @{
-            InputPath = $inputFilePath
-            OutputPath = $outputFilePath
-            ColumnName = $columnName
-            Key = $cryptoParams.Key
-            IV = $cryptoParams.IV
-            IsEncryption = $isEncryption
-            Extension = $extension
+
+            if ($result) {
+                $operation = if ($isEncryption) { "cryptage" } else { "décryptage" }
+                [System.Windows.MessageBox]::Show("Le $operation a été effectué avec succès.", "Succès", [System.Windows.MessageBoxButton]::OK, [System.Windows.MessageBoxImage]::Information)
+                $statusLabel.Text = "Traitement terminé avec succès."
+            }
         }
-        
-        $job.RunWorkerAsync($jobParams)
+        catch {
+            [System.Windows.MessageBox]::Show("Erreur lors du traitement: $_", "Erreur", [System.Windows.MessageBoxButton]::OK, [System.Windows.MessageBoxImage]::Error)
+            $statusLabel.Text = "Erreur lors du traitement."
+        }
+        finally {
+            # Réactiver les contrôles
+            Set-ControlState -Enabled $true -Controls @($inputFileBrowseButton,$columnComboBox,$outputFileBrowseButton,$processButton,$cancelButton,$keyTextBox,$ivTextBox,$encryptRadioButton,$decryptRadioButton)
+            $progressPanel.Visible = $false
+        }
     })
 
 $cancelButton.Add_Click({
