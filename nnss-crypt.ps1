@@ -36,9 +36,13 @@ function Update-ControlSizes {
     if($keyTextBox){ $keyTextBox.Width = [Math]::Min(400, $textBoxWidth - 50) }
     if($ivTextBox){ $ivTextBox.Width = [Math]::Min(400, $textBoxWidth - 50) }
 
-    # Repositionner les boutons
+    # Repositionner les boutons Parcourir
     if($inputFileBrowseButton){ $inputFileBrowseButton.Left = $buttonX }
     if($outputFileBrowseButton){ $outputFileBrowseButton.Left = $buttonX }
+
+    # Repositionner les boutons d'action (nouveau)
+    if($processButton){ $processButton.Left = [Math]::Max(380, $FormWidth - 260) }
+    if($cancelButton){ $cancelButton.Left = [Math]::Max(510, $FormWidth - 130) }
 }
 
 # Créer l'interface utilisateur
@@ -343,21 +347,19 @@ $separator4.BackColor = $themeColors.Border
 $section3Panel.Controls.Add($separator4)
 
 # Section 4: Mode et actions
-$actionsFlow = New-Object System.Windows.Forms.FlowLayoutPanel
-$actionsFlow.Dock = [System.Windows.Forms.DockStyle]::Fill
-$actionsFlow.FlowDirection = [System.Windows.Forms.FlowDirection]::LeftToRight
-$actionsFlow.Margin = New-Object System.Windows.Forms.Padding(0, 10, 0, 0)
-$mainPanel.Controls.Add($actionsFlow, 0, 4)
+$section4Panel = New-Object System.Windows.Forms.Panel
+$section4Panel.Dock = [System.Windows.Forms.DockStyle]::Fill
+$section4Panel.Margin = New-Object System.Windows.Forms.Padding(0, 5, 0, 5)
+$mainPanel.Controls.Add($section4Panel, 0, 4)
 
 # Mode de traitement
 $modeGroupBox = New-Object System.Windows.Forms.GroupBox
-$modeGroupBox.Location = New-Object System.Drawing.Point(0, 0)
+$modeGroupBox.Location = New-Object System.Drawing.Point(0, 10)
 $modeGroupBox.Size = New-Object System.Drawing.Size(300, 70)
-$modeGroupBox.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
 $modeGroupBox.Text = "Mode"
 $modeGroupBox.Font = $fontRegular
 $modeGroupBox.ForeColor = $themeColors.TextDark
-$actionsFlow.Controls.Add($modeGroupBox)
+$section4Panel.Controls.Add($modeGroupBox)
 
 $encryptRadioButton = New-Object System.Windows.Forms.RadioButton
 $encryptRadioButton.Location = New-Object System.Drawing.Point(20, 25)
@@ -374,22 +376,22 @@ $decryptRadioButton.Text = "Décrypter"
 $decryptRadioButton.Font = $fontRegular
 $modeGroupBox.Controls.Add($decryptRadioButton)
 
-# Boutons d'action
+# Boutons d'action avec ancrage correct
 $processButton = New-Object System.Windows.Forms.Button
-$processButton.Location = New-Object System.Drawing.Point(380, 15)
+$processButton.Location = New-Object System.Drawing.Point(380, 25)
 $processButton.Size = New-Object System.Drawing.Size(120, 40)
 $processButton.Text = "Traiter"
-Set-ModernButtonStyle -Button $processButton -BackColor $themeColors.Primary -ForeColor $themeColors.TextLight -IsPrimary
 $processButton.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Right
-$actionsFlow.Controls.Add($processButton)
+Set-ModernButtonStyle -Button $processButton -BackColor $themeColors.Primary -ForeColor $themeColors.TextLight -IsPrimary
+$section4Panel.Controls.Add($processButton)
 
 $cancelButton = New-Object System.Windows.Forms.Button
-$cancelButton.Location = New-Object System.Drawing.Point(510, 15)
+$cancelButton.Location = New-Object System.Drawing.Point(510, 25)
 $cancelButton.Size = New-Object System.Drawing.Size(120, 40)
 $cancelButton.Text = "Fermer"
-Set-ModernButtonStyle -Button $cancelButton -BackColor $themeColors.Secondary -ForeColor $themeColors.TextDark
 $cancelButton.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Right
-$actionsFlow.Controls.Add($cancelButton)
+Set-ModernButtonStyle -Button $cancelButton -BackColor $themeColors.Secondary -ForeColor $themeColors.TextDark
+$section4Panel.Controls.Add($cancelButton)
 
 # Indicateur de progression
 $progressPanel = New-Object System.Windows.Forms.Panel
