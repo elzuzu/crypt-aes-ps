@@ -6,9 +6,27 @@
 # Ce script permet de crypter ou décrypter les numéros NNSS dans un fichier CSV ou Excel
 # en utilisant l'algorithme AES-256-CBC avec une clé et un vecteur d'initialisation partagés.
 
-# Vérifier la version de PowerShell
-if ($PSVersionTable.PSVersion.Major -lt 5) {
-    Write-Error "Ce script nécessite PowerShell 5 ou supérieur." -Category InvalidArgument
+# Fonction de vérification de compatibilité
+function Test-PowerShellCompatibility {
+    if ($PSVersionTable.PSVersion.Major -lt 5) {
+        Write-Error "Ce script nécessite PowerShell 5.0 ou supérieur. Version actuelle: $($PSVersionTable.PSVersion)" -Category InvalidArgument
+        return $false
+    }
+
+    try {
+        Add-Type -AssemblyName System.Windows.Forms -ErrorAction Stop
+        Add-Type -AssemblyName System.Drawing -ErrorAction Stop
+        Add-Type -AssemblyName PresentationFramework -ErrorAction Stop
+    }
+    catch {
+        Write-Error "Impossible de charger les assemblies .NET requises: $_" -Category InvalidOperation
+        return $false
+    }
+
+    return $true
+}
+
+if (-not (Test-PowerShellCompatibility)) {
     return
 }
 
@@ -16,8 +34,19 @@ if ($PSVersionTable.PSVersion.Major -lt 5) {
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 Add-Type -AssemblyName PresentationFramework
-Add-Type -AssemblyName Microsoft.Office.Interop.Excel
-Add-Type -AssemblyName System.Windows.Forms.DataVisualization
+
+# Vérifier si Excel est disponible (optionnel)
+$global:ExcelAvailable = $false
+try {
+    $excel = New-Object -ComObject Excel.Application -ErrorAction Stop
+    $excel.Quit()
+    [System.Runtime.Interopservices.Marshal]::ReleaseComObject($excel) | Out-Null
+    $global:ExcelAvailable = $true
+    Write-Host "Microsoft Excel détecté - Support des fichiers .xlsx/.xls activé" -ForegroundColor Green
+}
+catch {
+    Write-Host "Microsoft Excel non détecté - Seuls les fichiers CSV seront supportés" -ForegroundColor Yellow
+}
 # Charger les fonctions de traitement
 . (Join-Path $PSScriptRoot "functions/crypt-functions.ps1")
 . (Join-Path $PSScriptRoot "functions/ui-styles.ps1")
@@ -160,7 +189,7 @@ $inputFilePanel.Controls.Add($inputFileInfo)
 $inputFileTextBox = New-Object System.Windows.Forms.TextBox
 $inputFileTextBox.Location = New-Object System.Drawing.Point(0, 30)
 $inputFileTextBox.Size = New-Object System.Drawing.Size(480, 30)
-$inputFileTextBox.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left -bor [System.Windows.Forms.AnchorStyles]::Right
+$inputFileTextBox.Anchor = [System.Windows.Forms.AnchorStyles]::Top -or [System.Windows.Forms.AnchorStyles]::Left -or [System.Windows.Forms.AnchorStyles]::Right
 $inputFileTextBox.ReadOnly = $true
 Set-ModernTextBoxStyle -TextBox $inputFileTextBox
 $inputFilePanel.Controls.Add($inputFileTextBox)
@@ -168,7 +197,7 @@ $inputFilePanel.Controls.Add($inputFileTextBox)
 $inputFileBrowseButton = New-Object System.Windows.Forms.Button
 $inputFileBrowseButton.Location = New-Object System.Drawing.Point(490, 30)
 $inputFileBrowseButton.Size = New-Object System.Drawing.Size(100, 30)
-$inputFileBrowseButton.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Right
+$inputFileBrowseButton.Anchor = [System.Windows.Forms.AnchorStyles]::Top -or [System.Windows.Forms.AnchorStyles]::Right
 $inputFileBrowseButton.Text = "Parcourir"
 Set-ModernButtonStyle -Button $inputFileBrowseButton -BackColor $themeColors.Secondary -ForeColor $themeColors.TextDark
 $inputFilePanel.Controls.Add($inputFileBrowseButton)
@@ -203,7 +232,7 @@ $columnPanel.Controls.Add($columnInfo)
 $columnComboBox = New-Object System.Windows.Forms.ComboBox
 $columnComboBox.Location = New-Object System.Drawing.Point(0, 30)
 $columnComboBox.Size = New-Object System.Drawing.Size(300, 30)
-$columnComboBox.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
+$columnComboBox.Anchor = [System.Windows.Forms.AnchorStyles]::Top -or [System.Windows.Forms.AnchorStyles]::Left
 $columnComboBox.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
 Set-ModernComboBoxStyle -ComboBox $columnComboBox
 $columnPanel.Controls.Add($columnComboBox)
@@ -256,7 +285,7 @@ $cryptoPanel.Controls.Add($keyInfo)
 $keyTextBox = New-Object System.Windows.Forms.TextBox
 $keyTextBox.Location = New-Object System.Drawing.Point(0, 30)
 $keyTextBox.Size = New-Object System.Drawing.Size(420, 30)
-$keyTextBox.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left -bor [System.Windows.Forms.AnchorStyles]::Right
+$keyTextBox.Anchor = [System.Windows.Forms.AnchorStyles]::Top -or [System.Windows.Forms.AnchorStyles]::Left -or [System.Windows.Forms.AnchorStyles]::Right
 $keyTextBox.PasswordChar = '•'
 Set-ModernTextBoxStyle -TextBox $keyTextBox
 Set-TextBoxPlaceholder -TextBox $keyTextBox -Text "min. 12 caractères"
@@ -282,7 +311,7 @@ $cryptoPanel.Controls.Add($ivInfo)
 $ivTextBox = New-Object System.Windows.Forms.TextBox
 $ivTextBox.Location = New-Object System.Drawing.Point(0, 95)
 $ivTextBox.Size = New-Object System.Drawing.Size(420, 30)
-$ivTextBox.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left -bor [System.Windows.Forms.AnchorStyles]::Right
+$ivTextBox.Anchor = [System.Windows.Forms.AnchorStyles]::Top -or [System.Windows.Forms.AnchorStyles]::Left -or [System.Windows.Forms.AnchorStyles]::Right
 $ivTextBox.PasswordChar = '•'
 Set-ModernTextBoxStyle -TextBox $ivTextBox
 Set-TextBoxPlaceholder -TextBox $ivTextBox -Text "min. 8 caractères"
@@ -326,7 +355,7 @@ $outputFilePanel.Controls.Add($outputFileLabel)
 $outputFileTextBox = New-Object System.Windows.Forms.TextBox
 $outputFileTextBox.Location = New-Object System.Drawing.Point(0, 30)
 $outputFileTextBox.Size = New-Object System.Drawing.Size(480, 30)
-$outputFileTextBox.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left -bor [System.Windows.Forms.AnchorStyles]::Right
+$outputFileTextBox.Anchor = [System.Windows.Forms.AnchorStyles]::Top -or [System.Windows.Forms.AnchorStyles]::Left -or [System.Windows.Forms.AnchorStyles]::Right
 $outputFileTextBox.ReadOnly = $true
 Set-ModernTextBoxStyle -TextBox $outputFileTextBox
 $outputFilePanel.Controls.Add($outputFileTextBox)
@@ -334,7 +363,7 @@ $outputFilePanel.Controls.Add($outputFileTextBox)
 $outputFileBrowseButton = New-Object System.Windows.Forms.Button
 $outputFileBrowseButton.Location = New-Object System.Drawing.Point(490, 30)
 $outputFileBrowseButton.Size = New-Object System.Drawing.Size(100, 30)
-$outputFileBrowseButton.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Right
+$outputFileBrowseButton.Anchor = [System.Windows.Forms.AnchorStyles]::Top -or [System.Windows.Forms.AnchorStyles]::Right
 $outputFileBrowseButton.Text = "Parcourir"
 Set-ModernButtonStyle -Button $outputFileBrowseButton -BackColor $themeColors.Secondary -ForeColor $themeColors.TextDark
 $outputFilePanel.Controls.Add($outputFileBrowseButton)
@@ -381,7 +410,7 @@ $processButton = New-Object System.Windows.Forms.Button
 $processButton.Location = New-Object System.Drawing.Point(380, 25)
 $processButton.Size = New-Object System.Drawing.Size(120, 40)
 $processButton.Text = "Traiter"
-$processButton.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Right
+$processButton.Anchor = [System.Windows.Forms.AnchorStyles]::Top -or [System.Windows.Forms.AnchorStyles]::Right
 Set-ModernButtonStyle -Button $processButton -BackColor $themeColors.Primary -ForeColor $themeColors.TextLight -IsPrimary
 $section4Panel.Controls.Add($processButton)
 
@@ -389,7 +418,7 @@ $cancelButton = New-Object System.Windows.Forms.Button
 $cancelButton.Location = New-Object System.Drawing.Point(510, 25)
 $cancelButton.Size = New-Object System.Drawing.Size(120, 40)
 $cancelButton.Text = "Fermer"
-$cancelButton.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Right
+$cancelButton.Anchor = [System.Windows.Forms.AnchorStyles]::Top -or [System.Windows.Forms.AnchorStyles]::Right
 Set-ModernButtonStyle -Button $cancelButton -BackColor $themeColors.Secondary -ForeColor $themeColors.TextDark
 $section4Panel.Controls.Add($cancelButton)
 
@@ -435,7 +464,11 @@ $form.Add_Resize({
 # Événements
 $inputFileBrowseButton.Add_Click({
         $openFileDialog = New-Object System.Windows.Forms.OpenFileDialog
-        $openFileDialog.Filter = "Fichiers de données (*.csv;*.xlsx;*.xls)|*.csv;*.xlsx;*.xls|Tous les fichiers (*.*)|*.*"
+        if ($global:ExcelAvailable) {
+            $openFileDialog.Filter = "Fichiers de données (*.csv;*.xlsx;*.xls)|*.csv;*.xlsx;*.xls|Fichiers CSV (*.csv)|*.csv|Fichiers Excel (*.xlsx;*.xls)|*.xlsx;*.xls|Tous les fichiers (*.*)|*.*"
+        } else {
+            $openFileDialog.Filter = "Fichiers CSV (*.csv)|*.csv|Tous les fichiers (*.*)|*.*"
+        }
         $openFileDialog.Title = "Sélectionner le fichier d'entrée"
         
         if ($openFileDialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {

@@ -121,13 +121,15 @@ function Get-FileColumns {
         [Parameter(Mandatory = $true)]
         [string]$FilePath
     )
-    
+
     $extension = [System.IO.Path]::GetExtension($FilePath).ToLower()
-    
+
     if ($extension -eq ".csv") {
         # Pour les fichiers CSV
         try {
-            $headers = (Get-Content $FilePath -First 1) -split ','
+            # Lecture plus robuste pour PowerShell 5
+            $firstLine = Get-Content $FilePath -First 1 -Encoding UTF8
+            $headers = $firstLine -split ',' | ForEach-Object { $_.Trim('"') }
             return $headers
         }
         catch {
@@ -136,32 +138,38 @@ function Get-FileColumns {
         }
     }
     elseif ($extension -eq ".xlsx" -or $extension -eq ".xls") {
-        # Pour les fichiers Excel
+        # Vérifier si Excel est disponible
+        if (-not $global:ExcelAvailable) {
+            [System.Windows.MessageBox]::Show("Microsoft Excel n'est pas installé. Veuillez utiliser un fichier CSV ou installer Microsoft Excel pour traiter les fichiers Excel.", "Excel non disponible", [System.Windows.MessageBoxButton]::OK, [System.Windows.MessageBoxImage]::Warning)
+            return $null
+        }
+
+        # Pour les fichiers Excel (si disponible)
         try {
             $excel = New-Object -ComObject Excel.Application
             $excel.Visible = $false
             $excel.DisplayAlerts = $false
-            
+
             $workbook = $excel.Workbooks.Open($FilePath)
             $worksheet = $workbook.Sheets.Item(1)
             $range = $worksheet.UsedRange
-            
+
             $columnCount = $range.Columns.Count
             $headers = @()
-            
+
             for ($i = 1; $i -le $columnCount; $i++) {
                 $cellValue = $worksheet.Cells.Item(1, $i).Text
                 $headers += $cellValue
             }
-            
+
             $workbook.Close($false)
             $excel.Quit()
-            
+
             [System.Runtime.Interopservices.Marshal]::ReleaseComObject($worksheet) | Out-Null
             [System.Runtime.Interopservices.Marshal]::ReleaseComObject($workbook) | Out-Null
             [System.Runtime.Interopservices.Marshal]::ReleaseComObject($excel) | Out-Null
             [System.GC]::Collect()
-            
+
             return $headers
         }
         catch {
@@ -248,9 +256,14 @@ function Process-ExcelFile {
         [Parameter(Mandatory = $true)]
         [byte[]]$IV,
         [Parameter(Mandatory = $true)]
-        [bool]$IsEncryption
+    [bool]$IsEncryption
     )
-    
+
+    if (-not $global:ExcelAvailable) {
+        Write-Error "Microsoft Excel n'est pas disponible"
+        return $false
+    }
+
     try {
         if (!(Test-Path $InputFilePath)) {
             Write-Error "Le fichier d'entrée n'existe pas : $InputFilePath"
