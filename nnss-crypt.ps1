@@ -25,7 +25,7 @@ Add-Type -AssemblyName System.Windows.Forms.DataVisualization
 # Créer l'interface utilisateur
 $form = New-Object System.Windows.Forms.Form
 $form.Text = "SPC - Cryptage/Décryptage des NNSS"
-$form.Size = New-Object System.Drawing.Size(700, 610)
+$form.Size = New-Object System.Drawing.Size(700, 680)  # Augmentation de la hauteur pour accueillir le panneau de progression
 $form.StartPosition = "CenterScreen"
 $form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedDialog
 $form.MaximizeBox = $false
@@ -338,7 +338,7 @@ $actionsPanel.Controls.Add($cancelButton)
 
 # Indicateur de progression
 $progressPanel = New-Object System.Windows.Forms.Panel
-$progressPanel.Location = New-Object System.Drawing.Point(24, 497)
+$progressPanel.Location = New-Object System.Drawing.Point(24, 567)  # Position plus basse pour éviter la superposition avec les boutons
 $progressPanel.Size = New-Object System.Drawing.Size(630, 60)
 $progressPanel.BackColor = [System.Drawing.Color]::Transparent
 $progressPanel.Visible = $false
