@@ -572,7 +572,15 @@ $processButton.Add_Click({
 
             if ($result) {
                 $operation = if ($isEncryption) { "cryptage" } else { "décryptage" }
-                [System.Windows.MessageBox]::Show("Le $operation a été effectué avec succès.", "Succès", [System.Windows.MessageBoxButton]::OK, [System.Windows.MessageBoxImage]::Information)
+
+                $warningCount = (Get-Job | Where-Object { $_.State -eq "Completed" } | Receive-Job -WarningVariable warnings).Count
+
+                if ($warningCount -gt 0) {
+                    [System.Windows.MessageBox]::Show("Le $operation a été effectué avec $warningCount avertissement(s). Vérifiez les valeurs dans le fichier de sortie.", "Succès avec avertissements", [System.Windows.MessageBoxButton]::OK, [System.Windows.MessageBoxImage]::Warning)
+                } else {
+                    [System.Windows.MessageBox]::Show("Le $operation a été effectué avec succès.", "Succès", [System.Windows.MessageBoxButton]::OK, [System.Windows.MessageBoxImage]::Information)
+                }
+
                 $statusLabel.Text = "Traitement terminé avec succès."
             }
         }
