@@ -192,6 +192,11 @@ function Process-CSVFile {
     )
     
     try {
+        if (!(Test-Path $InputFilePath)) {
+            Write-Error "Le fichier d'entrée n'existe pas : $InputFilePath"
+            return $false
+        }
+
         # Charger les données CSV
         $csvData = Import-Csv -Path $InputFilePath
         
@@ -221,11 +226,11 @@ function Process-CSVFile {
         
         # Enregistrer le fichier modifié
         $csvData | Export-Csv -Path $OutputFilePath -NoTypeInformation
-        
+
         return $true
     }
     catch {
-        [System.Windows.MessageBox]::Show("Erreur lors du traitement du fichier CSV: $_", "Erreur", [System.Windows.MessageBoxButton]::OK, [System.Windows.MessageBoxImage]::Error)
+        Write-Error "Erreur dans Process-CSVFile: $($_.Exception.Message)"
         return $false
     }
 }
@@ -247,6 +252,11 @@ function Process-ExcelFile {
     )
     
     try {
+        if (!(Test-Path $InputFilePath)) {
+            Write-Error "Le fichier d'entrée n'existe pas : $InputFilePath"
+            return $false
+        }
+
         $excel = New-Object -ComObject Excel.Application
         $excel.Visible = $false
         $excel.DisplayAlerts = $false
@@ -308,7 +318,7 @@ function Process-ExcelFile {
         return $true
     }
     catch {
-        [System.Windows.MessageBox]::Show("Erreur lors du traitement du fichier Excel: $_", "Erreur", [System.Windows.MessageBoxButton]::OK, [System.Windows.MessageBoxImage]::Error)
+        Write-Error "Erreur dans Process-ExcelFile: $($_.Exception.Message)"
         return $false
     }
 }
