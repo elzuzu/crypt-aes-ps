@@ -55,52 +55,56 @@ catch {
 function Update-ControlSizes {
     param($FormWidth)
 
-    # Ajuster la largeur des textbox selon la taille de la fenêtre
-    $textBoxWidth = [Math]::Max(300, $FormWidth - 200)
-    $buttonX = $textBoxWidth + 10
+    $availableWidth = $FormWidth - 60  # Marge totale
+    $textBoxWidth   = [Math]::Max(350, $availableWidth - 130)
+    $buttonX        = $textBoxWidth + 10
 
-    # Appliquer aux contrôles principaux
-    if($inputFileTextBox){ $inputFileTextBox.Width = $textBoxWidth }
-    if($outputFileTextBox){ $outputFileTextBox.Width = $textBoxWidth }
-    if($keyTextBox){ $keyTextBox.Width = [Math]::Min(400, $textBoxWidth - 50) }
-    if($ivTextBox){ $ivTextBox.Width = [Math]::Min(400, $textBoxWidth - 50) }
+    # TextBoxes principales
+    if($inputFileTextBox){
+        $inputFileTextBox.Width = $textBoxWidth
+        $inputFileBrowseButton.Left = $buttonX
+    }
+    if($outputFileTextBox){
+        $outputFileTextBox.Width = $textBoxWidth
+        $outputFileBrowseButton.Left = $buttonX
+    }
+    if($keyTextBox){ $keyTextBox.Width = [Math]::Min(450, $textBoxWidth) }
+    if($ivTextBox){ $ivTextBox.Width = [Math]::Min(450, $textBoxWidth) }
 
-    # Repositionner les boutons Parcourir
-    if($inputFileBrowseButton){ $inputFileBrowseButton.Left = $buttonX }
-    if($outputFileBrowseButton){ $outputFileBrowseButton.Left = $buttonX }
-
-    # Repositionner les boutons d'action (nouveau)
-    if($processButton){ $processButton.Left = [Math]::Max(380, $FormWidth - 260) }
-    if($cancelButton){ $cancelButton.Left = [Math]::Max(510, $FormWidth - 130) }
+    # Boutons d'action - positionnement plus stable
+    if($processButton){ $processButton.Left = [Math]::Max(350, $FormWidth - 280) }
+    if($cancelButton){ $cancelButton.Left = [Math]::Max(480, $FormWidth - 150) }
 }
 
 # Créer l'interface utilisateur
 $form = New-Object System.Windows.Forms.Form
 $form.Text = "SPC - Cryptage/Décryptage des NNSS"
-$form.Size = New-Object System.Drawing.Size(700, 720)
-$form.MinimumSize = New-Object System.Drawing.Size(650, 600)
+$form.Size = New-Object System.Drawing.Size(700, 580)  # Plus compact
+$form.MinimumSize = New-Object System.Drawing.Size(650, 520)  # Taille minimum réduite
 $form.StartPosition = "CenterScreen"
 $form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::Sizable
 $form.MaximizeBox = $true
-$form.AutoScroll = $true
+$form.AutoScroll = $false  # Désactiver pour éviter les décalages
 $form.BackColor = $themeColors.Background
 $form.ForeColor = $themeColors.TextDark
 $form.Font = $fontRegular
 
-$form.Padding = New-Object System.Windows.Forms.Padding(24)
+$form.Padding = New-Object System.Windows.Forms.Padding(15)  # Padding réduit
 
 # Créons un panel principal adaptatif
 $mainPanel = New-Object System.Windows.Forms.TableLayoutPanel
 $mainPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
 $mainPanel.ColumnCount = 1
 $mainPanel.RowCount = 6
-$mainPanel.Padding = New-Object System.Windows.Forms.Padding(20)
-$mainPanel.AutoScroll = $true
-$mainPanel.RowStyles.Add((New-Object System.Windows.Forms.RowStyle([System.Windows.Forms.SizeType]::Absolute, 80)))   # Header
-$mainPanel.RowStyles.Add((New-Object System.Windows.Forms.RowStyle([System.Windows.Forms.SizeType]::Absolute, 140)))  # Section 1
-$mainPanel.RowStyles.Add((New-Object System.Windows.Forms.RowStyle([System.Windows.Forms.SizeType]::Absolute, 160)))  # Section 2  
-$mainPanel.RowStyles.Add((New-Object System.Windows.Forms.RowStyle([System.Windows.Forms.SizeType]::Absolute, 100)))  # Section 3
-$mainPanel.RowStyles.Add((New-Object System.Windows.Forms.RowStyle([System.Windows.Forms.SizeType]::Absolute, 80)))   # Section 4
+$mainPanel.Padding = New-Object System.Windows.Forms.Padding(10)  # Padding réduit
+$mainPanel.AutoScroll = $false
+
+# RowStyles optimisés pour un layout compact
+$mainPanel.RowStyles.Add((New-Object System.Windows.Forms.RowStyle([System.Windows.Forms.SizeType]::Absolute, 60)))   # Header plus petit
+$mainPanel.RowStyles.Add((New-Object System.Windows.Forms.RowStyle([System.Windows.Forms.SizeType]::Absolute, 110)))  # Section 1 réduite
+$mainPanel.RowStyles.Add((New-Object System.Windows.Forms.RowStyle([System.Windows.Forms.SizeType]::Absolute, 130)))  # Section 2 réduite
+$mainPanel.RowStyles.Add((New-Object System.Windows.Forms.RowStyle([System.Windows.Forms.SizeType]::Absolute, 80)))   # Section 3 réduite
+$mainPanel.RowStyles.Add((New-Object System.Windows.Forms.RowStyle([System.Windows.Forms.SizeType]::Absolute, 60)))   # Section 4 réduite
 $mainPanel.RowStyles.Add((New-Object System.Windows.Forms.RowStyle([System.Windows.Forms.SizeType]::Percent, 100)))   # Espace restant
 $form.Controls.Add($mainPanel)
 
@@ -119,24 +123,24 @@ $logoImage.BackColor = [System.Drawing.Color]::Transparent
 # Icône de cadenas (simulée par un label)
 $lockIcon = New-Object System.Windows.Forms.Label
 $lockIcon.Text = "🔒"  # Symbole cadenas Unicode
-$lockIcon.Size = New-Object System.Drawing.Size(50, 50)
-$lockIcon.Location = New-Object System.Drawing.Point(24, 10)
-$lockIcon.Font = New-Object System.Drawing.Font("Segoe UI", 24)
+$lockIcon.Size = New-Object System.Drawing.Size(40, 40)  # Plus petit
+$lockIcon.Location = New-Object System.Drawing.Point(10, 5)  # Position ajustée
+$lockIcon.Font = New-Object System.Drawing.Font("Segoe UI", 20)  # Taille réduite
 $lockIcon.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
 $lockIcon.ForeColor = $themeColors.Primary
 $logoPanel.Controls.Add($lockIcon)
 
 $titleLabel = New-Object System.Windows.Forms.Label
-$titleLabel.Location = New-Object System.Drawing.Point(80, 10)
-$titleLabel.Size = New-Object System.Drawing.Size(570, 35)
+$titleLabel.Location = New-Object System.Drawing.Point(55, 5)  # Position ajustée
+$titleLabel.Size = New-Object System.Drawing.Size(500, 25)  # Hauteur réduite
 $titleLabel.Text = "Cryptage/Décryptage des NNSS"
-$titleLabel.Font = $fontTitle
+$titleLabel.Font = New-Object System.Drawing.Font('Segoe UI Semibold', 12)  # Taille réduite
 $titleLabel.ForeColor = $themeColors.TextDark
 $logoPanel.Controls.Add($titleLabel)
 
 $subtitleLabel = New-Object System.Windows.Forms.Label
-$subtitleLabel.Location = New-Object System.Drawing.Point(80, 45)
-$subtitleLabel.Size = New-Object System.Drawing.Size(570, 20)
+$subtitleLabel.Location = New-Object System.Drawing.Point(55, 30)  # Position ajustée
+$subtitleLabel.Size = New-Object System.Drawing.Size(500, 15)  # Hauteur réduite
 $subtitleLabel.Text = "Outil pour l'échange sécurisé de données SPC-Hospice Général"
 $subtitleLabel.Font = $fontSmall
 $subtitleLabel.ForeColor = [System.Drawing.Color]::FromArgb(96, 94, 92)
@@ -145,7 +149,7 @@ $logoPanel.Controls.Add($subtitleLabel)
 # Section 1 - conteneur
 $section1Panel = New-Object System.Windows.Forms.Panel
 $section1Panel.Dock = [System.Windows.Forms.DockStyle]::Fill
-$section1Panel.Margin = New-Object System.Windows.Forms.Padding(0,5,0,5)
+$section1Panel.Margin = New-Object System.Windows.Forms.Padding(0,2,0,2)  # Marges réduites
 $mainPanel.Controls.Add($section1Panel,0,1)
 
 # Séparateur
@@ -166,8 +170,8 @@ $section1Panel.Controls.Add($fileSelectionLabel)
 
 # Sélection du fichier d'entrée
 $inputFilePanel = New-Object System.Windows.Forms.Panel
-$inputFilePanel.Location = New-Object System.Drawing.Point(0, 34)
-$inputFilePanel.Size = New-Object System.Drawing.Size(630, 60)
+$inputFilePanel.Location = New-Object System.Drawing.Point(0, 25)  # Position plus haute
+$inputFilePanel.Size = New-Object System.Drawing.Size(630, 50)     # Hauteur réduite
 $inputFilePanel.BackColor = [System.Drawing.Color]::Transparent
 $section1Panel.Controls.Add($inputFilePanel)
 
@@ -189,7 +193,6 @@ $inputFilePanel.Controls.Add($inputFileInfo)
 $inputFileTextBox = New-Object System.Windows.Forms.TextBox
 $inputFileTextBox.Location = New-Object System.Drawing.Point(0, 30)
 $inputFileTextBox.Size = New-Object System.Drawing.Size(480, 30)
-$inputFileTextBox.Anchor = [System.Windows.Forms.AnchorStyles]::Top -or [System.Windows.Forms.AnchorStyles]::Left -or [System.Windows.Forms.AnchorStyles]::Right
 $inputFileTextBox.ReadOnly = $true
 Set-ModernTextBoxStyle -TextBox $inputFileTextBox
 $inputFilePanel.Controls.Add($inputFileTextBox)
@@ -197,22 +200,21 @@ $inputFilePanel.Controls.Add($inputFileTextBox)
 $inputFileBrowseButton = New-Object System.Windows.Forms.Button
 $inputFileBrowseButton.Location = New-Object System.Drawing.Point(490, 30)
 $inputFileBrowseButton.Size = New-Object System.Drawing.Size(100, 30)
-$inputFileBrowseButton.Anchor = [System.Windows.Forms.AnchorStyles]::Top -or [System.Windows.Forms.AnchorStyles]::Right
 $inputFileBrowseButton.Text = "Parcourir"
 Set-ModernButtonStyle -Button $inputFileBrowseButton -BackColor $themeColors.Secondary -ForeColor $themeColors.TextDark
 $inputFilePanel.Controls.Add($inputFileBrowseButton)
 
 # Sélection de la colonne à traiter
 $columnPanel = New-Object System.Windows.Forms.Panel
-$columnPanel.Location = New-Object System.Drawing.Point(0, 98)
-$columnPanel.Size = New-Object System.Drawing.Size(630, 60)
+$columnPanel.Location = New-Object System.Drawing.Point(0, 80)     # Position ajustée
+$columnPanel.Size = New-Object System.Drawing.Size(630, 50)        # Hauteur réduite
 $columnPanel.BackColor = [System.Drawing.Color]::Transparent
 $section1Panel.Controls.Add($columnPanel)
 
 # Section 2 - conteneur
 $section2Panel = New-Object System.Windows.Forms.Panel
 $section2Panel.Dock = [System.Windows.Forms.DockStyle]::Fill
-$section2Panel.Margin = New-Object System.Windows.Forms.Padding(0,5,0,5)
+$section2Panel.Margin = New-Object System.Windows.Forms.Padding(0,2,0,2)
 $mainPanel.Controls.Add($section2Panel,0,2)
 $columnLabel = New-Object System.Windows.Forms.Label
 $columnLabel.Location = New-Object System.Drawing.Point(0, 0)
@@ -232,7 +234,6 @@ $columnPanel.Controls.Add($columnInfo)
 $columnComboBox = New-Object System.Windows.Forms.ComboBox
 $columnComboBox.Location = New-Object System.Drawing.Point(0, 30)
 $columnComboBox.Size = New-Object System.Drawing.Size(300, 30)
-$columnComboBox.Anchor = [System.Windows.Forms.AnchorStyles]::Top -or [System.Windows.Forms.AnchorStyles]::Left
 $columnComboBox.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
 Set-ModernComboBoxStyle -ComboBox $columnComboBox
 $columnPanel.Controls.Add($columnComboBox)
@@ -261,7 +262,7 @@ $section2Panel.Controls.Add($cryptoLabel)
 # Groupbox pour les paramètres de cryptage
 $cryptoPanel = New-Object System.Windows.Forms.Panel
 $cryptoPanel.Location = New-Object System.Drawing.Point(0, 34)
-$cryptoPanel.Size = New-Object System.Drawing.Size(630, 130)
+$cryptoPanel.Size = New-Object System.Drawing.Size(630, 100)  # Hauteur réduite
 $cryptoPanel.BackColor = [System.Drawing.Color]::Transparent
 $section2Panel.Controls.Add($cryptoPanel)
 
@@ -283,9 +284,8 @@ New-InfoTooltip -Control $keyInfo -Text "La clé doit être identique entre le S
 $cryptoPanel.Controls.Add($keyInfo)
 
 $keyTextBox = New-Object System.Windows.Forms.TextBox
-$keyTextBox.Location = New-Object System.Drawing.Point(0, 30)
+$keyTextBox.Location = New-Object System.Drawing.Point(0, 25)  # Plus haut
 $keyTextBox.Size = New-Object System.Drawing.Size(420, 30)
-$keyTextBox.Anchor = [System.Windows.Forms.AnchorStyles]::Top -or [System.Windows.Forms.AnchorStyles]::Left -or [System.Windows.Forms.AnchorStyles]::Right
 $keyTextBox.PasswordChar = '•'
 Set-ModernTextBoxStyle -TextBox $keyTextBox
 Set-TextBoxPlaceholder -TextBox $keyTextBox -Text "min. 12 caractères"
@@ -293,7 +293,7 @@ $cryptoPanel.Controls.Add($keyTextBox)
 
 # Vecteur d'initialisation (IV)
 $ivLabel = New-Object System.Windows.Forms.Label
-$ivLabel.Location = New-Object System.Drawing.Point(0, 70)
+$ivLabel.Location = New-Object System.Drawing.Point(0, 55)     # Plus haut
 $ivLabel.Size = New-Object System.Drawing.Size(250, 25)
 $ivLabel.Text = "Vecteur d'initialisation (IV):"
 $ivLabel.Font = $fontRegular
@@ -301,7 +301,7 @@ $cryptoPanel.Controls.Add($ivLabel)
 
 $ivInfo = New-Object System.Windows.Forms.Label
 $ivInfo.Size = New-Object System.Drawing.Size(20, 20)
-$ivInfo.Location = New-Object System.Drawing.Point(250, 70)
+$ivInfo.Location = New-Object System.Drawing.Point(250, 55)
 $ivInfo.BackColor = [System.Drawing.Color]::Transparent
 $ivInfo.Text = "ℹ"
 $ivInfo.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
@@ -309,9 +309,8 @@ New-InfoTooltip -Control $ivInfo -Text "Le vecteur d'initialisation doit égalem
 $cryptoPanel.Controls.Add($ivInfo)
 
 $ivTextBox = New-Object System.Windows.Forms.TextBox
-$ivTextBox.Location = New-Object System.Drawing.Point(0, 95)
+$ivTextBox.Location = New-Object System.Drawing.Point(0, 75)   # Plus haut
 $ivTextBox.Size = New-Object System.Drawing.Size(420, 30)
-$ivTextBox.Anchor = [System.Windows.Forms.AnchorStyles]::Top -or [System.Windows.Forms.AnchorStyles]::Left -or [System.Windows.Forms.AnchorStyles]::Right
 $ivTextBox.PasswordChar = '•'
 Set-ModernTextBoxStyle -TextBox $ivTextBox
 Set-TextBoxPlaceholder -TextBox $ivTextBox -Text "min. 8 caractères"
@@ -320,7 +319,7 @@ $cryptoPanel.Controls.Add($ivTextBox)
 # Section 3 - conteneur
 $section3Panel = New-Object System.Windows.Forms.Panel
 $section3Panel.Dock = [System.Windows.Forms.DockStyle]::Fill
-$section3Panel.Margin = New-Object System.Windows.Forms.Padding(0,5,0,5)
+$section3Panel.Margin = New-Object System.Windows.Forms.Padding(0,2,0,2)
 $mainPanel.Controls.Add($section3Panel,0,3)
 # Séparateur
 $separator3 = New-Object System.Windows.Forms.Panel
@@ -355,7 +354,6 @@ $outputFilePanel.Controls.Add($outputFileLabel)
 $outputFileTextBox = New-Object System.Windows.Forms.TextBox
 $outputFileTextBox.Location = New-Object System.Drawing.Point(0, 30)
 $outputFileTextBox.Size = New-Object System.Drawing.Size(480, 30)
-$outputFileTextBox.Anchor = [System.Windows.Forms.AnchorStyles]::Top -or [System.Windows.Forms.AnchorStyles]::Left -or [System.Windows.Forms.AnchorStyles]::Right
 $outputFileTextBox.ReadOnly = $true
 Set-ModernTextBoxStyle -TextBox $outputFileTextBox
 $outputFilePanel.Controls.Add($outputFileTextBox)
@@ -363,7 +361,6 @@ $outputFilePanel.Controls.Add($outputFileTextBox)
 $outputFileBrowseButton = New-Object System.Windows.Forms.Button
 $outputFileBrowseButton.Location = New-Object System.Drawing.Point(490, 30)
 $outputFileBrowseButton.Size = New-Object System.Drawing.Size(100, 30)
-$outputFileBrowseButton.Anchor = [System.Windows.Forms.AnchorStyles]::Top -or [System.Windows.Forms.AnchorStyles]::Right
 $outputFileBrowseButton.Text = "Parcourir"
 Set-ModernButtonStyle -Button $outputFileBrowseButton -BackColor $themeColors.Secondary -ForeColor $themeColors.TextDark
 $outputFilePanel.Controls.Add($outputFileBrowseButton)
@@ -378,7 +375,7 @@ $section3Panel.Controls.Add($separator4)
 # Section 4: Mode et actions
 $section4Panel = New-Object System.Windows.Forms.Panel
 $section4Panel.Dock = [System.Windows.Forms.DockStyle]::Fill
-$section4Panel.Margin = New-Object System.Windows.Forms.Padding(0, 5, 0, 5)
+$section4Panel.Margin = New-Object System.Windows.Forms.Padding(0, 2, 0, 2)
 $mainPanel.Controls.Add($section4Panel, 0, 4)
 
 # Mode de traitement
@@ -405,12 +402,11 @@ $decryptRadioButton.Text = "Décrypter"
 $decryptRadioButton.Font = $fontRegular
 $modeGroupBox.Controls.Add($decryptRadioButton)
 
-# Boutons d'action avec ancrage correct
+# Boutons d'action
 $processButton = New-Object System.Windows.Forms.Button
 $processButton.Location = New-Object System.Drawing.Point(380, 25)
 $processButton.Size = New-Object System.Drawing.Size(120, 40)
 $processButton.Text = "Traiter"
-$processButton.Anchor = [System.Windows.Forms.AnchorStyles]::Top -or [System.Windows.Forms.AnchorStyles]::Right
 Set-ModernButtonStyle -Button $processButton -BackColor $themeColors.Primary -ForeColor $themeColors.TextLight -IsPrimary
 $section4Panel.Controls.Add($processButton)
 
@@ -418,27 +414,26 @@ $cancelButton = New-Object System.Windows.Forms.Button
 $cancelButton.Location = New-Object System.Drawing.Point(510, 25)
 $cancelButton.Size = New-Object System.Drawing.Size(120, 40)
 $cancelButton.Text = "Fermer"
-$cancelButton.Anchor = [System.Windows.Forms.AnchorStyles]::Top -or [System.Windows.Forms.AnchorStyles]::Right
 Set-ModernButtonStyle -Button $cancelButton -BackColor $themeColors.Secondary -ForeColor $themeColors.TextDark
 $section4Panel.Controls.Add($cancelButton)
 
 # Indicateur de progression
 $progressPanel = New-Object System.Windows.Forms.Panel
 $progressPanel.Dock = [System.Windows.Forms.DockStyle]::Bottom
-$progressPanel.Height = 60
+$progressPanel.Height = 45  # Plus compact
 $progressPanel.Visible = $false
 $form.Controls.Add($progressPanel)
 
 $progressBar = New-Object System.Windows.Forms.ProgressBar
 $progressBar.Dock = [System.Windows.Forms.DockStyle]::Top
-$progressBar.Height = 25
+$progressBar.Height = 20    # Plus fin
 $progressBar.Margin = New-Object System.Windows.Forms.Padding(10,5,10,5)
 $progressBar.Style = [System.Windows.Forms.ProgressBarStyle]::Marquee
 $progressBar.MarqueeAnimationSpeed = 30
 $progressPanel.Controls.Add($progressBar)
 
 $progressLabel = New-Object System.Windows.Forms.Label
-$progressLabel.Location = New-Object System.Drawing.Point(0, 35)
+$progressLabel.Location = New-Object System.Drawing.Point(0, 25)  # Position ajustée
 $progressLabel.Size = New-Object System.Drawing.Size(630, 20)
 $progressLabel.Text = "Traitement en cours..."
 $progressLabel.Font = $fontSmall
