@@ -4,12 +4,12 @@ function ConvertTo-SecureAESKey {
         [Parameter(Mandatory = $true)]
         [string]$KeyString,
         [Parameter(Mandatory = $true)]
-        [string]$IVString
+        [string]$InitVector
     )
     
     # S'assurer que la clé et l'IV sont de la bonne longueur pour AES-256-CBC
     $KeyBytes = [System.Text.Encoding]::UTF8.GetBytes($KeyString)
-    $IVBytes = [System.Text.Encoding]::UTF8.GetBytes($IVString)
+    $IVBytes = [System.Text.Encoding]::UTF8.GetBytes($InitVector)
     
     # Ajuster la taille de la clé à 32 octets (256 bits)
     if ($KeyBytes.Length -gt 32) {
@@ -40,7 +40,7 @@ function Protect-NNSSData {
         [Parameter(Mandatory = $true)]
         [byte[]]$Key,
         [Parameter(Mandatory = $true)]
-        [byte[]]$IV
+        [byte[]]$InitVector
     )
     
     try {
@@ -50,7 +50,7 @@ function Protect-NNSSData {
         # Créer un objet de cryptage AES
         $AES = [System.Security.Cryptography.Aes]::Create()
         $AES.Key = $Key
-        $AES.IV = $IV
+        $AES.IV = $InitVector
         $AES.Mode = [System.Security.Cryptography.CipherMode]::CBC
         $AES.Padding = [System.Security.Cryptography.PaddingMode]::PKCS7
         
@@ -81,7 +81,7 @@ function Unprotect-NNSSData {
         [Parameter(Mandatory = $true)]
         [byte[]]$Key,
         [Parameter(Mandatory = $true)]
-        [byte[]]$IV
+        [byte[]]$InitVector
     )
     
     try {
@@ -91,7 +91,7 @@ function Unprotect-NNSSData {
         # Créer un objet de décryptage AES
         $AES = [System.Security.Cryptography.Aes]::Create()
         $AES.Key = $Key
-        $AES.IV = $IV
+        $AES.IV = $InitVector
         $AES.Mode = [System.Security.Cryptography.CipherMode]::CBC
         $AES.Padding = [System.Security.Cryptography.PaddingMode]::PKCS7
         
@@ -194,7 +194,7 @@ function Process-CSVFile {
         [Parameter(Mandatory = $true)]
         [byte[]]$Key,
         [Parameter(Mandatory = $true)]
-        [byte[]]$IV,
+        [byte[]]$InitVector,
         [Parameter(Mandatory = $true)]
         [bool]$IsEncryption
     )
@@ -218,11 +218,11 @@ function Process-CSVFile {
                 if (![string]::IsNullOrEmpty($originalValue)) {
                     if ($IsEncryption) {
                         # Crypter
-                        $newValue = Protect-NNSSData -InputText $originalValue -Key $Key -IV $IV
+                        $newValue = Protect-NNSSData -InputText $originalValue -Key $Key -InitVector $InitVector
                     }
                     else {
                         # Décrypter
-                        $newValue = Unprotect-NNSSData -EncryptedText $originalValue -Key $Key -IV $IV
+                        $newValue = Unprotect-NNSSData -EncryptedText $originalValue -Key $Key -InitVector $InitVector
                     }
                     
                     if ($newValue -ne $null) {
@@ -254,7 +254,7 @@ function Process-ExcelFile {
         [Parameter(Mandatory = $true)]
         [byte[]]$Key,
         [Parameter(Mandatory = $true)]
-        [byte[]]$IV,
+        [byte[]]$InitVector,
         [Parameter(Mandatory = $true)]
     [bool]$IsEncryption
     )
@@ -305,11 +305,11 @@ function Process-ExcelFile {
             if (![string]::IsNullOrEmpty($cellValue)) {
                 if ($IsEncryption) {
                     # Crypter
-                    $newValue = Protect-NNSSData -InputText $cellValue -Key $Key -IV $IV
+                    $newValue = Protect-NNSSData -InputText $cellValue -Key $Key -InitVector $InitVector
                 }
                 else {
                     # Décrypter
-                    $newValue = Unprotect-NNSSData -EncryptedText $cellValue -Key $Key -IV $IV
+                    $newValue = Unprotect-NNSSData -EncryptedText $cellValue -Key $Key -InitVector $InitVector
                 }
                 
                 if ($newValue -ne $null) {
