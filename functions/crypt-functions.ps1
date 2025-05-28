@@ -1,4 +1,32 @@
 # Fonctions de cryptage/décryptage
+
+function Test-Base64String {
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$InputString
+    )
+
+    if ([string]::IsNullOrEmpty($InputString)) {
+        return $false
+    }
+
+    if ($InputString.Length % 4 -ne 0) {
+        return $false
+    }
+
+    $base64Pattern = '^[A-Za-z0-9+/]*={0,2}$'
+    if ($InputString -notmatch $base64Pattern) {
+        return $false
+    }
+
+    try {
+        [Convert]::FromBase64String($InputString) | Out-Null
+        return $true
+    }
+    catch {
+        return $false
+    }
+}
 function ConvertTo-SecureAESKey {
     param (
         [Parameter(Mandatory = $true)]
@@ -42,8 +70,13 @@ function Protect-NNSSData {
         [Parameter(Mandatory = $true)]
         [byte[]]$InitVector
     )
-    
+
     try {
+        if (Test-Base64String -InputString $InputText) {
+            Write-Warning "La valeur '$InputText' semble déjà être cryptée (format Base64). Valeur ignorée."
+            return $InputText
+        }
+
         # Convertir la chaîne en tableau d'octets
         $InputBytes = [System.Text.Encoding]::UTF8.GetBytes($InputText)
         
@@ -64,8 +97,9 @@ function Protect-NNSSData {
         return $EncryptedText
     }
     catch {
-        [System.Windows.MessageBox]::Show("Erreur lors du cryptage: $_", "Erreur", [System.Windows.MessageBoxButton]::OK, [System.Windows.MessageBoxImage]::Error)
-        return $null
+        $errorMessage = "Erreur lors du cryptage de '$InputText': $($_.Exception.Message)"
+        Write-Warning $errorMessage
+        return "[ERREUR_CRYPT] $InputText"
     }
     finally {
         if ($AES) {
@@ -83,10 +117,19 @@ function Unprotect-NNSSData {
         [Parameter(Mandatory = $true)]
         [byte[]]$InitVector
     )
-    
+
     try {
-        # Convertir la chaîne Base64 en tableau d'octets
+        if (-not (Test-Base64String -InputString $EncryptedText)) {
+            Write-Warning "La valeur '$EncryptedText' ne semble pas être cryptée (format Base64 invalide). Valeur ignorée."
+            return $EncryptedText
+        }
+
         $EncryptedBytes = [Convert]::FromBase64String($EncryptedText)
+
+        if ($EncryptedBytes.Length -lt 16) {
+            Write-Warning "La valeur cryptée '$EncryptedText' est trop courte pour être valide. Valeur ignorée."
+            return $EncryptedText
+        }
         
         # Créer un objet de décryptage AES
         $AES = [System.Security.Cryptography.Aes]::Create()
@@ -105,8 +148,9 @@ function Unprotect-NNSSData {
         return $DecryptedText
     }
     catch {
-        [System.Windows.MessageBox]::Show("Erreur lors du décryptage: $_", "Erreur", [System.Windows.MessageBoxButton]::OK, [System.Windows.MessageBoxImage]::Error)
-        return $null
+        $errorMessage = "Erreur lors du décryptage de '$EncryptedText': $($_.Exception.Message)"
+        Write-Warning $errorMessage
+        return "[ERREUR_DECRYPT] $EncryptedText"
     }
     finally {
         if ($AES) {
@@ -207,13 +251,17 @@ function Process-CSVFile {
 
         # Charger les données CSV
         $csvData = Import-Csv -Path $InputFilePath
-        
+
         # Traiter chaque ligne
+        $processedCount = 0
+        $errorCount = 0
+        $skippedCount = 0
+
         foreach ($row in $csvData) {
             # S'assurer que la colonne existe
             if ($row.PSObject.Properties.Name -contains $ColumnName) {
                 $originalValue = $row.$ColumnName
-                
+
                 # Ignorer les valeurs vides ou nulles
                 if (![string]::IsNullOrEmpty($originalValue)) {
                     if ($IsEncryption) {
@@ -224,16 +272,26 @@ function Process-CSVFile {
                         # Décrypter
                         $newValue = Unprotect-NNSSData -EncryptedText $originalValue -Key $Key -InitVector $InitVector
                     }
-                    
+
                     if ($newValue -ne $null) {
-                        $row.$ColumnName = $newValue
+                        if ($newValue.StartsWith("[ERREUR_")) {
+                            $errorCount++
+                            Write-Warning "Erreur de traitement pour la valeur: $originalValue"
+                        } else {
+                            $row.$ColumnName = $newValue
+                            $processedCount++
+                        }
                     }
+                } else {
+                    $skippedCount++
                 }
             }
         }
-        
+
         # Enregistrer le fichier modifié
         $csvData | Export-Csv -Path $OutputFilePath -NoTypeInformation
+
+        Write-Host "Traitement terminé - Traités: $processedCount, Erreurs: $errorCount, Ignorés: $skippedCount" -ForegroundColor Green
 
         return $true
     }
