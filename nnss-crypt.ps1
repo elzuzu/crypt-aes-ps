@@ -530,7 +530,7 @@ $processButton.Add_Click({
         }
         
         # Obtenir les paramètres de cryptage
-        $cryptoParams = ConvertTo-SecureAESKey -KeyString $keyTextBox.Text -IVString $ivTextBox.Text
+        $cryptoParams = ConvertTo-SecureAESKey -KeyString $keyTextBox.Text -InitVector $ivTextBox.Text
         
         # Configurer le traitement
         $inputFilePath = $inputFileTextBox.Text
@@ -561,10 +561,10 @@ $processButton.Add_Click({
 
         try {
             if ($extension -eq ".csv") {
-                $result = Process-CSVFile -InputFilePath $inputFilePath -OutputFilePath $outputFilePath -ColumnName $columnName -Key $cryptoParams.Key -IV $cryptoParams.IV -IsEncryption $isEncryption
+                $result = Process-CSVFile -InputFilePath $inputFilePath -OutputFilePath $outputFilePath -ColumnName $columnName -Key $cryptoParams.Key -InitVector $cryptoParams.IV -IsEncryption $isEncryption
             }
             elseif ($extension -eq ".xlsx" -or $extension -eq ".xls") {
-                $result = Process-ExcelFile -InputFilePath $inputFilePath -OutputFilePath $outputFilePath -ColumnName $columnName -Key $cryptoParams.Key -IV $cryptoParams.IV -IsEncryption $isEncryption
+                $result = Process-ExcelFile -InputFilePath $inputFilePath -OutputFilePath $outputFilePath -ColumnName $columnName -Key $cryptoParams.Key -InitVector $cryptoParams.IV -IsEncryption $isEncryption
             }
             else {
                 throw "Format de fichier non pris en charge."
